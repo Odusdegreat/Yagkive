@@ -29,7 +29,7 @@ Open http://localhost:3000.
 
 ## Features
 
-- **Catalogue grid** — 14 pieces across Outerwear, Bottoms, Accessories, and Footwear, filterable by category.
+- **Catalogue grid** — 14 pieces across Outerwear for now, Bottoms, Accessories, and Footwear, filterable by category.
 - **Live search** — search by name, REF, spec, or category; opens via the header search icon.
 - **Wishlist** — heart a piece from its card, or toggle the wishlist-only view from the header heart (with count badge).
 - **Archive (cart)** — a right-hand sheet holds added items with quantity steppers, product thumbnails, and subtotal.

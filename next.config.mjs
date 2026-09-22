@@ -1,19 +1,19 @@
+import { fileURLToPath } from "node:url";
+
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: { root: projectRoot },
+  outputFileTracingRoot: projectRoot,
   distDir: process.env.PLAYWRIGHT_TEST ? ".next-playwright" : ".next",
+  output: "standalone",
   productionBrowserSourceMaps: false,
-  
-  // Disable linting and type-checking during production builds to save RAM
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 
   experimental: {
     staticGenerationMaxConcurrency: 1,
-    webpackBuildWorker: false,
+    webpackBuildWorker: true,
+    webpackMemoryOptimizations: true,
   },
 
   images: {

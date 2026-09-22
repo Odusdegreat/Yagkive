@@ -9,5 +9,5 @@ export default defineConfig({
     url: "http://127.0.0.1:3100",
     timeout: 120000,
     env: { NEXT_PUBLIC_API_URL: "/api", PLAYWRIGHT_TEST: "1" },
-  },
+   },
 });

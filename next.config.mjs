@@ -2,13 +2,12 @@
 const nextConfig = {
   distDir: process.env.PLAYWRIGHT_TEST ? ".next-playwright" : ".next",
   experimental: {
-    // https://github.com/vercel/next.js/issues/95545 - static generation of a
-    // random page (incl. the internal /_global-error fallback) can crash in the
-    // build worker when the host CPU is contended. Mitigations:
-    // - retries mask the per-attempt race,
-    // - low per-worker concurrency + batching into one worker reduce contention,
-    // - prerenderEarlyExit:false degrades a failed page to dynamic instead of
-    //   killing the whole build (otherwise a transient failure = deploy failure).
+    // Root cause (reproduced locally): a non-production NODE_ENV (e.g.
+// development) during `next build` makes Next run dev-mode React, so every
+// prerender throws "Cannot read properties of null (reading 'useRef'/...)".
+// Fix is environmental: NODE_ENV must be production/unset on the host.
+// The settings below are defensive insurance only (transient prerender
+// failures degrade to dynamic instead of failing the deploy).
     staticGenerationRetryCount: 5,
     staticGenerationMaxConcurrency: 2,
     staticGenerationMinPagesPerWorker: 25,

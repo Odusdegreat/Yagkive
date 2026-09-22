@@ -1,13 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: process.env.PLAYWRIGHT_TEST ? ".next-playwright" : ".next",
+  productionBrowserSourceMaps: false,
   experimental: {
     // Root cause (reproduced locally): a non-production NODE_ENV (e.g.
-// development) during `next build` makes Next run dev-mode React, so every
-// prerender throws "Cannot read properties of null (reading 'useRef'/...)".
-// Fix is environmental: NODE_ENV must be production/unset on the host.
-// The settings below are defensive insurance only (transient prerender
-// failures degrade to dynamic instead of failing the deploy).
+    // development) during `next build` makes Next run dev-mode React, so every
+    // prerender throws "Cannot read properties of null (reading 'useRef'/...)".
+    // Fix is environmental: NODE_ENV must be production/unset on the host.
+    // The settings below are defensive insurance only (transient prerender
+    // failures degrade to dynamic instead of failing the deploy).
     staticGenerationRetryCount: 5,
     staticGenerationMaxConcurrency: 2,
     staticGenerationMinPagesPerWorker: 25,

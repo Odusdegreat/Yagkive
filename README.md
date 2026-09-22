@@ -19,6 +19,12 @@ bun run dev
 
 Open http://localhost:3000.
 
+## API connection
+
+The storefront connects to the Express API at `http://localhost:5000/api` by default. To override this, copy `.env.local.example` to `.env.local` and set `NEXT_PUBLIC_API_URL` to the deployed API URL. Start the API from `server/` before starting the frontend.
+
+The header account button lets customers register and sign in. Signed-in customers get server-backed cart and wishlist data; checkout collects a delivery address and redirects to Paystack. Products created through the API replace the local catalogue preview automatically.
+
 ## Scripts
 
 | Command        | Description                  |

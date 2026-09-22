@@ -3,15 +3,17 @@
 import { ArrowUpRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { Sheet, SheetClose, SheetContent, SheetTitle } from "../ui/sheet";
-import type { CartItem } from "../../lib/products";
+import { Sheet, SheetContent, SheetTitle } from "../ui/sheet";
+import type { ApiCartItem } from "../../lib/api";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface CartDrawerProps {
   open: boolean;
   onClose: () => void;
-  items: CartItem[];
-  onQty: (id: string, delta: number) => void;
+  items: ApiCartItem[];
+  onQty: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
+  onCheckout: () => void;
 }
 
 export default function CartDrawer({
@@ -19,26 +21,22 @@ export default function CartDrawer({
   onClose,
   items,
   onQty,
-  onRemove,
+  onRemove, onCheckout,
 }: CartDrawerProps) {
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent
         side="right"
-        className="gap-0 border-l p-0"
+        className="w-[90vw] max-w-[400px] gap-0 border-l p-0 sm:w-96"
         showCloseButton={false}
       >
         <SheetTitle className="sr-only">Your Archive</SheetTitle>
 
         <div className="drawer-head">
           <span className="eyebrow">YOUR ARCHIVE ({items.length})</span>
-          <SheetClose asChild>
-            <Button type="button" variant="ghost" size="icon" aria-label="Close cart">
-              <X size={18} />
-            </Button>
-          </SheetClose>
+          <Tooltip><TooltipTrigger asChild><Button type="button" variant="ghost" size="icon" aria-label="Close cart" onClick={onClose}><X size={18} /></Button></TooltipTrigger><TooltipContent>Close cart</TooltipContent></Tooltip>
         </div>
 
         <div className="drawer-body">
@@ -50,11 +48,11 @@ export default function CartDrawer({
             </div>
           ) : (
             items.map((item) => (
-              <div className="drawer-item" key={item.id}>
+              <div className="drawer-item" key={item._id}>
                 <div className="drawer-thumb">
                   <Image
-                    src={item.image}
-                    alt={item.name}
+                    src={item.product.images[0]?.url ?? "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=300&auto=format&fit=crop"}
+                    alt={item.product.name}
                     fill
                     sizes="52px"
                     className="drawer-image"
@@ -62,42 +60,42 @@ export default function CartDrawer({
                 </div>
                 <div className="drawer-info">
                   <div className="drawer-row">
-                    <span className="drawer-name">{item.name}</span>
-                    <Button
+                    <span className="drawer-name">{item.product.name}</span>
+                    <Tooltip><TooltipTrigger asChild><Button
                       type="button"
                       variant="ghost"
                       size="icon"
                       className="remove-btn size-6"
-                      onClick={() => onRemove(item.id)}
-                      aria-label={`Remove ${item.name}`}
+                      onClick={() => onRemove(item._id)}
+                      aria-label={`Remove ${item.product.name}`}
                     >
                       <X size={13} />
-                    </Button>
+                    </Button></TooltipTrigger><TooltipContent>Remove item</TooltipContent></Tooltip>
                   </div>
-                  <span className="drawer-ref">{item.ref}</span>
+                  <span className="drawer-ref">{item.product.ref}</span>
                   <div className="drawer-row">
                     <div className="qty-stepper">
-                      <Button
+                      <Tooltip><TooltipTrigger asChild><Button
                         type="button"
                         variant="ghost"
                         size="icon-xs"
-                        onClick={() => onQty(item.id, -1)}
+                        onClick={() => onQty(item._id, item.quantity - 1)}
                         aria-label="Decrease quantity"
                       >
                         <Minus size={12} />
-                      </Button>
-                      <span>{item.qty}</span>
-                      <Button
+                      </Button></TooltipTrigger><TooltipContent>Decrease quantity</TooltipContent></Tooltip>
+                      <span>{item.quantity}</span>
+                      <Tooltip><TooltipTrigger asChild><Button
                         type="button"
                         variant="ghost"
                         size="icon-xs"
-                        onClick={() => onQty(item.id, 1)}
+                        onClick={() => onQty(item._id, item.quantity + 1)}
                         aria-label="Increase quantity"
                       >
                         <Plus size={12} />
-                      </Button>
+                      </Button></TooltipTrigger><TooltipContent>Increase quantity</TooltipContent></Tooltip>
                     </div>
-                    <span className="drawer-price">${item.price * item.qty}</span>
+                    <span className="drawer-price">${(item.product.price * item.quantity).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -109,9 +107,9 @@ export default function CartDrawer({
           <div className="drawer-foot">
             <div className="subtotal-row">
               <span>SUBTOTAL</span>
-              <span>${subtotal}</span>
+              <span>${subtotal.toLocaleString()}</span>
             </div>
-            <Button type="button" className="checkout-btn">
+            <Button type="button" className="checkout-btn" onClick={onCheckout}>
               CHECKOUT <ArrowUpRight size={16} />
             </Button>
           </div>

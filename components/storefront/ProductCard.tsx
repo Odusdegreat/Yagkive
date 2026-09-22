@@ -6,12 +6,14 @@ import { Check, Heart, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import CornerBrackets from "./CornerBrackets";
 import type { Product } from "@/lib/products";
 
 interface ProductCardProps {
   product: Product;
-  onAdd: (product: Product) => void;
+  onAdd: (product: Product) => Promise<boolean>;
   wishlisted: boolean;
   onToggleWish: (id: string) => void;
 }
@@ -23,10 +25,18 @@ export default function ProductCard({
   onToggleWish,
 }: ProductCardProps) {
   const [justAdded, setJustAdded] = useState(false);
+  const [adding, setAdding] = useState(false);
   const timeoutRef = useRef<number | undefined>(undefined);
 
-  const handleAdd = () => {
-    onAdd(product);
+  const handleAdd = async () => {
+    setAdding(true);
+    let added = false;
+    try {
+      added = await onAdd(product);
+    } finally {
+      setAdding(false);
+    }
+    if (!added) return;
     setJustAdded(true);
     window.clearTimeout(timeoutRef.current);
     timeoutRef.current = window.setTimeout(() => setJustAdded(false), 1200);
@@ -35,7 +45,7 @@ export default function ProductCard({
   return (
     <Card className="card group gap-0 ring-0" size="sm">
       <CornerBrackets />
-      <Button
+      <Tooltip><TooltipTrigger asChild><Button
         type="button"
         variant="ghost"
         size="icon"
@@ -45,7 +55,7 @@ export default function ProductCard({
         aria-pressed={wishlisted}
       >
         <Heart size={15} strokeWidth={2} fill={wishlisted ? "currentColor" : "none"} />
-      </Button>
+      </Button></TooltipTrigger><TooltipContent>{wishlisted ? "Remove from wishlist" : "Save to wishlist"}</TooltipContent></Tooltip>
 
       <div className="card-art">
         <Image
@@ -61,19 +71,22 @@ export default function ProductCard({
       <CardContent className="card-body p-0">
         <div className="card-row">
           <h3 className="card-name">{product.name}</h3>
-          <span className="card-price">${product.price}</span>
+          <span className="card-price">${product.price.toLocaleString()}</span>
         </div>
         <p className="card-note">{product.note}</p>
       </CardContent>
 
-      <Button
+      <Tooltip><TooltipTrigger asChild><Button
         type="button"
         variant="outline"
         className={cn("add-bar", justAdded && "add-bar-done")}
         onClick={handleAdd}
+        disabled={adding}
         aria-label={`Add ${product.name} to cart`}
       >
-        {justAdded ? (
+        {adding ? (
+          <><LoadingSpinner /> ADDING</>
+        ) : justAdded ? (
           <>
             <Check size={15} /> ADDED
           </>
@@ -81,8 +94,8 @@ export default function ProductCard({
           <>
             <Plus size={15} /> ADD TO CART
           </>
-        )}
-      </Button>
+      )}
+      </Button></TooltipTrigger><TooltipContent>Add {product.name} to cart</TooltipContent></Tooltip>
     </Card>
   );
 }

@@ -27,4 +27,25 @@ Use `bun.cmd` in PowerShell where script execution is disabled. In other termina
 
 Admin-only routes require a user whose `role` is `admin`; make this change directly in MongoDB for the initial administrator. All authenticated routes accept the access-token cookie or `Authorization: Bearer <token>`.
 
-Paystack, Cloudinary, and Resend activate only after their respective environment variables are supplied. Amounts are currently handled in NGN.
+Paystack, Cloudinary, and Resend activate only after their respective environment variables are supplied.
+
+## Checkout and deployment
+
+- MongoDB must be a replica set (including a single-node development replica set) or Atlas. Startup rejects standalone MongoDB because reservations and payment confirmation require transactions.
+- Prices and order totals are USD. Set `USD_TO_NGN_RATE` deliberately; the API signs a ten-minute quote showing the exact NGN charge. This is a configured rate, not a live market feed. Shipping is currently free.
+- Call `GET /api/orders/quote`, then send its `quoteToken` with the shipping address to `POST /api/orders`. Supply a UUID `Idempotency-Key` and reuse the key and body on retries. A changed cart requires a fresh quote.
+- Inventory is reserved for thirty minutes. Expired holds are released every minute and during checkout. Payment confirmation, stock changes, and removal of purchased cart quantities occur in one transaction.
+- Late payments reacquire stock if possible. Otherwise the order becomes `payment_review`: payment is recorded, but an operator must arrange fulfillment or a refund. Never fulfill these orders automatically. Refunds are performed in Paystack.
+- Only unpaid pending orders can be cancelled through the status endpoint. Paid orders progress through `paid → processing → shipped → delivered`. Paid cancellation requires a refund workflow.
+- Configure the Paystack webhook URL as `/api/webhooks/paystack`. Signatures use `PAYSTACK_SECRET_KEY`, per [Paystack's documentation](https://paystack.com/docs/payments/webhooks/). The old `PAYSTACK_WEBHOOK_SECRET` is no longer used. Missing payment configuration rejects callbacks.
+- Deploy the frontend and API on the same site (for example, shop.example.com and api.example.com), using HTTPS in production. Authentication uses secure, HTTP-only, SameSite=Lax cookies.
+- Keep order indexes enabled. Startup waits for order indexes, including the unique customer checkout key, before serving requests.
+
+## Validation
+
+```powershell
+bun.cmd run typecheck
+bun.cmd run test
+```
+
+Tests run under Node.js 22 through tsx, create a temporary MongoDB replica set, and mock Paystack. They never use the application database or make real payments. The first run downloads MongoDB. Use `bun run test`, not the built-in Bun test runner. Run a Paystack test-mode checkout and webhook smoke test on the deployed environment before enabling live payments.

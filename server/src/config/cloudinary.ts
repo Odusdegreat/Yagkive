@@ -3,8 +3,14 @@ import { env } from "./env.js";
 import { logger } from "../utils/logger.js";
 
 export function configureCloudinary(): void {
-  if (!env.CLOUDINARY_CLOUD_NAME || !env.CLOUDINARY_API_KEY || !env.CLOUDINARY_API_SECRET) {
-    logger.warn("Cloudinary credentials not configured — uploads will be disabled");
+  if (
+    !env.CLOUDINARY_CLOUD_NAME ||
+    !env.CLOUDINARY_API_KEY ||
+    !env.CLOUDINARY_API_SECRET
+  ) {
+    logger.warn(
+      "Cloudinary credentials not configured — uploads will be disabled",
+    );
     return;
   }
 

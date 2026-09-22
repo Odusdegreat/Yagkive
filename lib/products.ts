@@ -1,8 +1,9 @@
-export type Category = "Outerwear" | "Bottoms" | "Accessories" | "Footwear";
+export type Category = string;
 
 export type Filter = "All" | Category;
 
-export type ProductIconType = "jacket" | "vest" | "trouser" | "cap" | "tote" | "boot";
+export type ProductIconType =
+  "jacket" | "vest" | "trouser" | "cap" | "tote" | "boot";
 
 export interface Product {
   id: string;
@@ -13,13 +14,22 @@ export interface Product {
   note: string;
   icon: ProductIconType;
   image: string;
+  stock?: number;
+  sizes?: string[];
+  colors?: string[];
 }
 
 export interface CartItem extends Product {
   qty: number;
 }
 
-export const CATEGORIES: Filter[] = ["All", "Outerwear", "Bottoms", "Accessories", "Footwear"];
+export const CATEGORIES: Filter[] = [
+  "All",
+  "Outerwear",
+  "Bottoms",
+  "Accessories",
+  "Footwear",
+];
 
 export const PRODUCTS: Product[] = [
   {
@@ -30,7 +40,8 @@ export const PRODUCTS: Product[] = [
     price: 85,
     note: "Cotton twill, welded seams",
     icon: "jacket",
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "02",
@@ -40,7 +51,8 @@ export const PRODUCTS: Product[] = [
     price: 55,
     note: "6-pocket, brass hardware",
     icon: "vest",
-    image: "https://images.unsplash.com/photo-1637579103895-9ba8218e9aca?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1637579103895-9ba8218e9aca?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "03",
@@ -50,7 +62,8 @@ export const PRODUCTS: Product[] = [
     price: 50,
     note: "Ripstop nylon blend",
     icon: "trouser",
-    image: "https://images.unsplash.com/photo-1511794322962-129ddbd0af38?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1511794322962-129ddbd0af38?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "04",
@@ -60,7 +73,8 @@ export const PRODUCTS: Product[] = [
     price: 18,
     note: "Merino, double-cuff",
     icon: "cap",
-    image: "https://images.unsplash.com/photo-1618354691792-d1d42acfd860?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1618354691792-d1d42acfd860?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "05",
@@ -70,7 +84,8 @@ export const PRODUCTS: Product[] = [
     price: 38,
     note: "18oz canvas, leather base",
     icon: "tote",
-    image: "https://images.unsplash.com/photo-1535981444082-2a5dc0548ef3?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1535981444082-2a5dc0548ef3?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "06",
@@ -80,7 +95,8 @@ export const PRODUCTS: Product[] = [
     price: 110,
     note: "Full-grain, welted sole",
     icon: "boot",
-    image: "https://images.unsplash.com/photo-1605812860427-4024433a70fd?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1605812860427-4024433a70fd?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "07",
@@ -90,7 +106,8 @@ export const PRODUCTS: Product[] = [
     price: 95,
     note: "3-layer shell, storm flap",
     icon: "jacket",
-    image: "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "08",
@@ -100,7 +117,8 @@ export const PRODUCTS: Product[] = [
     price: 45,
     note: "Suffolk flannel, boxed placket",
     icon: "jacket",
-    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "09",
@@ -110,7 +128,8 @@ export const PRODUCTS: Product[] = [
     price: 52,
     note: "14oz selvedge, hidden rivets",
     icon: "trouser",
-    image: "https://images.unsplash.com/photo-1517438476312-10d79c077509?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1517438476312-10d79c077509?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "10",
@@ -120,7 +139,8 @@ export const PRODUCTS: Product[] = [
     price: 35,
     note: "Nylon ripstop, articulated",
     icon: "trouser",
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "11",
@@ -130,7 +150,8 @@ export const PRODUCTS: Product[] = [
     price: 16,
     note: "Tape-sealed, adjustable",
     icon: "cap",
-    image: "https://images.unsplash.com/photo-1521369909029-2afed882baee?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1521369909029-2afed882baee?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "12",
@@ -140,7 +161,8 @@ export const PRODUCTS: Product[] = [
     price: 65,
     note: "Waxed canvas, webbing straps",
     icon: "tote",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "13",
@@ -150,7 +172,8 @@ export const PRODUCTS: Product[] = [
     price: 90,
     note: "Suede upper, lug sole",
     icon: "boot",
-    image: "https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: "14",
@@ -160,6 +183,7 @@ export const PRODUCTS: Product[] = [
     price: 30,
     note: "Webbing straps, moulded footbed",
     icon: "boot",
-    image: "https://images.unsplash.com/photo-1560343090-f0409e92791a?q=80&w=800&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1560343090-f0409e92791a?q=80&w=800&auto=format&fit=crop",
   },
 ];

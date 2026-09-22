@@ -14,6 +14,7 @@ interface CartDrawerProps {
   onQty: (id: string, quantity: number) => void;
   onRemove: (id: string) => void;
   onCheckout: () => void;
+  pending?: boolean;
 }
 
 export default function CartDrawer({
@@ -21,9 +22,14 @@ export default function CartDrawer({
   onClose,
   items,
   onQty,
-  onRemove, onCheckout,
+  onRemove,
+  onCheckout,
+  pending = false,
 }: CartDrawerProps) {
-  const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + (item.product?.price ?? 0) * item.quantity,
+    0,
+  );
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -36,7 +42,20 @@ export default function CartDrawer({
 
         <div className="drawer-head">
           <span className="eyebrow">YOUR ARCHIVE ({items.length})</span>
-          <Tooltip><TooltipTrigger asChild><Button type="button" variant="ghost" size="icon" aria-label="Close cart" onClick={onClose}><X size={18} /></Button></TooltipTrigger><TooltipContent>Close cart</TooltipContent></Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Close cart"
+                onClick={onClose}
+              >
+                <X size={18} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Close cart</TooltipContent>
+          </Tooltip>
         </div>
 
         <div className="drawer-body">
@@ -47,59 +66,102 @@ export default function CartDrawer({
               <span>Items you add will be catalogued here.</span>
             </div>
           ) : (
-            items.map((item) => (
-              <div className="drawer-item" key={item._id}>
-                <div className="drawer-thumb">
-                  <Image
-                    src={item.product.images[0]?.url ?? "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=300&auto=format&fit=crop"}
-                    alt={item.product.name}
-                    fill
-                    sizes="52px"
-                    className="drawer-image"
-                  />
-                </div>
-                <div className="drawer-info">
-                  <div className="drawer-row">
-                    <span className="drawer-name">{item.product.name}</span>
-                    <Tooltip><TooltipTrigger asChild><Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="remove-btn size-6"
-                      onClick={() => onRemove(item._id)}
-                      aria-label={`Remove ${item.product.name}`}
-                    >
-                      <X size={13} />
-                    </Button></TooltipTrigger><TooltipContent>Remove item</TooltipContent></Tooltip>
+            items.map((item) =>
+              item.product ? (
+                <div className="drawer-item" key={item._id}>
+                  <div className="drawer-thumb">
+                    <Image
+                      src={
+                        item.product.images[0]?.url ??
+                        "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=300&auto=format&fit=crop"
+                      }
+                      alt={item.product.name}
+                      fill
+                      sizes="52px"
+                      className="drawer-image"
+                    />
                   </div>
-                  <span className="drawer-ref">{item.product.ref}</span>
-                  <div className="drawer-row">
-                    <div className="qty-stepper">
-                      <Tooltip><TooltipTrigger asChild><Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={() => onQty(item._id, item.quantity - 1)}
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus size={12} />
-                      </Button></TooltipTrigger><TooltipContent>Decrease quantity</TooltipContent></Tooltip>
-                      <span>{item.quantity}</span>
-                      <Tooltip><TooltipTrigger asChild><Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={() => onQty(item._id, item.quantity + 1)}
-                        aria-label="Increase quantity"
-                      >
-                        <Plus size={12} />
-                      </Button></TooltipTrigger><TooltipContent>Increase quantity</TooltipContent></Tooltip>
+                  <div className="drawer-info">
+                    <div className="drawer-row">
+                      <span className="drawer-name">{item.product.name}</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="remove-btn size-6"
+                            disabled={pending}
+                            onClick={() => onRemove(item._id)}
+                            aria-label={`Remove ${item.product.name}`}
+                          >
+                            <X size={13} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Remove item</TooltipContent>
+                      </Tooltip>
                     </div>
-                    <span className="drawer-price">${(item.product.price * item.quantity).toLocaleString()}</span>
+                    <span className="drawer-ref">
+                      {[item.product.ref, item.size, item.color]
+                        .filter(Boolean)
+                        .join(" / ")}
+                    </span>
+                    <div className="drawer-row">
+                      <div className="qty-stepper">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-xs"
+                              disabled={pending}
+                              onClick={() => onQty(item._id, item.quantity - 1)}
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus size={12} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Decrease quantity</TooltipContent>
+                        </Tooltip>
+                        <span>{item.quantity}</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-xs"
+                              disabled={
+                                pending ||
+                                item.quantity >=
+                                  Math.min(20, item.product.stock)
+                              }
+                              onClick={() => onQty(item._id, item.quantity + 1)}
+                              aria-label="Increase quantity"
+                            >
+                              <Plus size={12} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Increase quantity</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <span className="drawer-price">
+                        $
+                        {(
+                          (item.product?.price ?? 0) * item.quantity
+                        ).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ) : (
+                <div key={item._id} className="drawer-item">
+                  <p>This item is no longer available.</p>
+                  <Button disabled={pending} onClick={() => onRemove(item._id)}>
+                    Remove unavailable item
+                  </Button>
+                </div>
+              ),
+            )
           )}
         </div>
 
@@ -109,7 +171,15 @@ export default function CartDrawer({
               <span>SUBTOTAL</span>
               <span>${subtotal.toLocaleString()}</span>
             </div>
-            <Button type="button" className="checkout-btn" onClick={onCheckout}>
+            <Button
+              type="button"
+              className="checkout-btn"
+              disabled={
+                pending ||
+                items.some((item) => !item.product || !item.product.isPublished)
+              }
+              onClick={onCheckout}
+            >
               CHECKOUT <ArrowUpRight size={16} />
             </Button>
           </div>

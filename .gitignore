@@ -3,6 +3,7 @@ node_modules/
 
 # next.js
 .next/
+.next-playwright/
 out/
 next-env.d.ts
 
@@ -19,6 +20,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 bun-debug.log*
+test-results/
+playwright-report/
 
 # env files
 .env*.local

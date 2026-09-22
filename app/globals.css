@@ -1615,3 +1615,8 @@ a {
     @apply font-sans;
   }
 }
+
+.commerce-dialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 101; max-height: 90dvh; overflow-y: auto; }
+.commerce-form { display: grid; gap: 14px; }
+.commerce-modal select, .variant-picker select { width: 100%; padding: 10px; background: var(--navy); color: var(--paper); border: 1px solid var(--line); }
+.variant-picker { display: grid; gap: 4px; margin-top: 8px; }

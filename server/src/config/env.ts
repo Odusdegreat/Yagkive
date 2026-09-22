@@ -5,7 +5,9 @@ dotenv.config();
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
 
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
 
@@ -14,7 +16,6 @@ const envSchema = z.object({
 
   PAYSTACK_SECRET_KEY: z.string().optional().default(""),
   PAYSTACK_PUBLIC_KEY: z.string().optional().default(""),
-  PAYSTACK_WEBHOOK_SECRET: z.string().optional().default(""),
   USD_TO_NGN_RATE: z.coerce.number().positive().default(1600),
 
   CLOUDINARY_CLOUD_NAME: z.string().optional().default(""),
@@ -24,7 +25,10 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional().default(""),
   RESEND_FROM_EMAIL: z.string().optional().default(""),
 
-  CLIENT_URL: z.string().url("CLIENT_URL must be a valid URL").default("http://localhost:3000"),
+  CLIENT_URL: z
+    .string()
+    .url("CLIENT_URL must be a valid URL")
+    .default("http://localhost:3000"),
 });
 
 type Env = z.infer<typeof envSchema>;

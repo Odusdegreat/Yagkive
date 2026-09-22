@@ -1,62 +1,49 @@
-# Yagkive — Technical Archive Storefront
+﻿# Yagkive storefront
 
-A single-page storefront for **YAGKIVE**, a technical-archive streetwear brand. Products are catalogued like schematic parts — REF numbers, blueprint grid, corner crops, safety-orange stamps — over a navy drafting-table ground.
+Next.js, React, and Tailwind storefront backed by the Express API in `server/`.
 
-## Stack
+## Development
 
-- **Next.js 16** (App Router) + **React 19**
-- **Tailwind CSS v4** (PostCSS)
-- **shadcn/ui** components (`components/ui`) — Card, Button, Sheet, Input, Badge
-- **lucide-react** icons
-- **Bun** package manager
-
-## Getting started
-
-```bash
-bun install
-bun run dev
+```powershell
+bun.cmd install
+bun.cmd run dev
 ```
 
-Open http://localhost:3000.
+Use `bun` instead of `bun.cmd` outside PowerShell. The frontend runs at http://localhost:3000. Copy `.env.local.example` to `.env.local` to configure `NEXT_PUBLIC_API_URL`; the default is http://localhost:5000/api.
 
-## API connection
+Start the backend separately, following [server/README.md](server/README.md). Checkout requires MongoDB Atlas or a replica set for inventory transactions.
 
-The storefront connects to the Express API at `http://localhost:5000/api` by default. To override this, copy `.env.local.example` to `.env.local` and set `NEXT_PUBLIC_API_URL` to the deployed API URL. Start the API from `server/` before starting the frontend.
+## Shopping flow
 
-The header account button lets customers register and sign in. Signed-in customers get server-backed cart and wishlist data; checkout collects a delivery address and redirects to Paystack. Products created through the API replace the local catalogue preview automatically.
+- The catalogue and categories come from the API. Loading, empty, and error states are explicit; errors offer retry.
+- Catalogue pagination is fetched completely. Search, category filters, and wishlist filtering operate on the loaded products.
+- Products expose available sizes, colors, and stock. Unavailable products cannot be added, and variant choices are validated by the API.
+- Signed-in customers have a server-backed cart and wishlist. Cart updates wait for the server and deleted products are handled safely.
+- Checkout displays the USD total, configured exchange rate, and exact NGN charge before redirecting to Paystack. Failed requests reuse a persisted checkout key to prevent duplicate orders.
+- Payment verification supports retry and sign-in recovery without losing the payment reference. Confirmed orders offer a downloadable receipt.
+- Authentication and checkout dialogs support keyboard focus containment and Escape.
 
-## Scripts
+Product records are managed through the API or the backend seed script. `lib/products.ts` contains editorial sample data for the lookbook; it is not the live shop catalogue.
 
-| Command        | Description                  |
-| -------------- | ---------------------------- |
-| `bun run dev`  | Start the dev server         |
-| `bun run build`| Create a production build    |
-| `bun run start`| Serve the production build   |
+## Validation
 
-## Features
-
-- **Catalogue grid** — 14 pieces across Outerwear for now, Bottoms, Accessories, and Footwear, filterable by category.
-- **Live search** — search by name, REF, spec, or category; opens via the header search icon.
-- **Wishlist** — heart a piece from its card, or toggle the wishlist-only view from the header heart (with count badge).
-- **Archive (cart)** — a right-hand sheet holds added items with quantity steppers, product thumbnails, and subtotal.
-- **Hero** — product photo in a schematic frame; click it (or the logo) to navigate. The hero hides while searching or viewing the wishlist.
-
-## Project structure
-
-```
-app/                  App Router pages, layout, global styles
-components/
-  storefront/         Storefront, ProductCard, CartDrawer, Marquee, …
-  ui/                 shadcn/ui primitives
-lib/
-  products.ts         Catalogue data (products, categories, types)
-  utils.ts            cn() helper
+```powershell
+bun.cmd run lint
+bun.cmd run typecheck
+bun.cmd run build
+bun.cmd x playwright install chromium
+bun.cmd run test
 ```
 
-## Customizing the catalogue
+Use `bun run test` for the frontend, not the built-in `bun test` command. Browser tests run a separate local frontend on port 3100 using `.next-playwright/`, with mocked API responses; an existing development server can stay running. Backend integration-test instructions are in [server/README.md](server/README.md).
 
-Edit `lib/products.ts` — each product needs a unique `id`, `ref`, `name`, `category`, `price`, `note`, `icon`, and `image` URL. Images are served from `images.unsplash.com` (see `next.config.mjs` `remotePatterns`).
+## Structure
 
-## Theming
+- `app/`: pages and global styles.
+- `components/storefront/`: catalogue, cart, checkout, authentication, and receipts.
+- `components/ui/`: shared controls and accessible dialogs.
+- `lib/api.ts`: typed API client, session refresh, and catalogue pagination.
+- `server/`: API, persistence, payment handling, and integration tests.
+- `tests/`: browser regression tests.
 
-The design tokens live in `app/globals.css`: the blueprint palette is defined as custom properties on `.page` (navy, cyan, paper, orange), and the shadcn/ui theme variables (`--background`, `--primary`, `--border`, `--radius`, …) are themed to match in `:root`.
+The visual theme is defined in `app/globals.css`.

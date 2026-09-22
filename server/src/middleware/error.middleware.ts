@@ -20,10 +20,31 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ): void {
+  const databaseError = err as AppError & { code?: number };
+  if (err.name === "CastError" || err.name === "ValidationError") {
+    err.statusCode = 400;
+    err.isOperational = true;
+    err.message = "Invalid request data";
+  }
+  if (databaseError.code === 11000) {
+    err.statusCode = 409;
+    err.isOperational = true;
+    err.message = "This record already exists";
+  }
+  if (err.name === "VersionError") {
+    err.statusCode = 409;
+    err.isOperational = true;
+    err.message = "Your cart changed. Please retry.";
+  }
   const statusCode = err.statusCode ?? 500;
   const message = err.isOperational ? err.message : "Something went wrong";
 
-  const logDetails = { statusCode, method: _req.method, path: _req.originalUrl, message: err.message };
+  const logDetails = {
+    statusCode,
+    method: _req.method,
+    path: _req.originalUrl,
+    message: err.message,
+  };
   if (statusCode >= 500) {
     logger.error({ err, ...logDetails }, "Request failed");
   } else {
@@ -33,6 +54,7 @@ export function errorHandler(
   res.status(statusCode).json({
     success: false,
     message,
-    ...(env.NODE_ENV === "development" && !err.isOperational && { stack: err.stack }),
+    ...(env.NODE_ENV === "development" &&
+      !err.isOperational && { stack: err.stack }),
   });
 }

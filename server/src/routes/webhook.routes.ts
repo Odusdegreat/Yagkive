@@ -1,8 +1,42 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import crypto from "crypto";
 import { paystackWebhook } from "../controllers/order.controller.js";
 import { env } from "../config/env.js";
 import { createAppError } from "../middleware/error.middleware.js";
+
+export function validPaystackSignature(
+  payload: Buffer,
+  signature: unknown,
+  secret: string,
+): boolean {
+  if (
+    !secret ||
+    typeof signature !== "string" ||
+    !/^[a-f0-9]{128}$/i.test(signature)
+  )
+    return false;
+  const expected = crypto.createHmac("sha512", secret).update(payload).digest();
+  return crypto.timingSafeEqual(Buffer.from(signature, "hex"), expected);
+}
+
 const router = Router();
-router.post("/paystack", (req, _res, next) => { if (!env.PAYSTACK_WEBHOOK_SECRET) return next(); const signature = req.headers["x-paystack-signature"]; const payload = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body)); const expected = crypto.createHmac("sha512", env.PAYSTACK_WEBHOOK_SECRET).update(payload).digest("hex"); if (typeof signature !== "string" || signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return next(createAppError("Invalid payment webhook signature", 401)); next(); }, paystackWebhook);
+router.post(
+  "/paystack",
+  (req, _res, next) => {
+    if (!env.PAYSTACK_SECRET_KEY)
+      return next(createAppError("Payments are not configured", 503));
+    if (
+      !Buffer.isBuffer(req.body) ||
+      !validPaystackSignature(
+        req.body,
+        req.headers["x-paystack-signature"],
+        env.PAYSTACK_SECRET_KEY,
+      )
+    ) {
+      return next(createAppError("Invalid payment webhook signature", 401));
+    }
+    next();
+  },
+  paystackWebhook,
+);
 export default router;

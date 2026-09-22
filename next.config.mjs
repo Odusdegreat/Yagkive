@@ -2,11 +2,12 @@
 const nextConfig = {
   distDir: process.env.PLAYWRIGHT_TEST ? ".next-playwright" : ".next",
   experimental: {
-    // https://github.com/vercel/next.js/issues/95545 - static-export prerender
-    // of the internal /_global-error page can intermittently crash in the build
-    // worker on some hosts. Retry and cap per-worker concurrency as a mitigation.
-    staticGenerationRetryCount: 2,
-    staticGenerationMaxConcurrency: 4,
+    // https://github.com/vercel/next.js/issues/95545 - static generation of a
+    // random page (incl. the internal /_global-error fallback) can crash in the
+    // build worker when the host CPU is contended; the race is per-attempt, so
+    // generous retries plus low per-worker concurrency reliably mask it.
+    staticGenerationRetryCount: 5,
+    staticGenerationMaxConcurrency: 2,
   },
   images: {
     // Product images are supplied by the catalogue API. Serve them directly so

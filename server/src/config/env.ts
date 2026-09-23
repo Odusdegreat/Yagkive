@@ -29,6 +29,19 @@ const envSchema = z.object({
     .string()
     .url("CLIENT_URL must be a valid URL")
     .default("http://localhost:3000"),
+
+  COOKIE_SAMESITE: z.enum(["lax", "none"]).default("lax"),
+
+  CORS_ORIGINS: z
+    .string()
+    .optional()
+    .default("")
+    .transform((value) =>
+      value
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    ),
 });
 
 type Env = z.infer<typeof envSchema>;

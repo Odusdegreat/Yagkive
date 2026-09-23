@@ -5,8 +5,8 @@ import type { UserDocument } from "../models/User.js";
 
 const cookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === "production",
-  sameSite: "lax" as const,
+  secure: env.NODE_ENV === "production" || env.COOKIE_SAMESITE === "none",
+  sameSite: env.COOKIE_SAMESITE,
   maxAge: 15 * 60 * 1000,
 };
 export const issueTokens = (

@@ -38,8 +38,30 @@ Paystack, Cloudinary, and Resend activate only after their respective environmen
 - Late payments reacquire stock if possible. Otherwise the order becomes `payment_review`: payment is recorded, but an operator must arrange fulfillment or a refund. Never fulfill these orders automatically. Refunds are performed in Paystack.
 - Only unpaid pending orders can be cancelled through the status endpoint. Paid orders progress through `paid → processing → shipped → delivered`. Paid cancellation requires a refund workflow.
 - Configure the Paystack webhook URL as `/api/webhooks/paystack`. Signatures use `PAYSTACK_SECRET_KEY`, per [Paystack's documentation](https://paystack.com/docs/payments/webhooks/). The old `PAYSTACK_WEBHOOK_SECRET` is no longer used. Missing payment configuration rejects callbacks.
-- Deploy the frontend and API on the same site (for example, shop.example.com and api.example.com), using HTTPS in production. Authentication uses secure, HTTP-only, SameSite=Lax cookies.
 - Keep order indexes enabled. Startup waits for order indexes, including the unique customer checkout key, before serving requests.
+
+### Render deployment
+
+For a cross-site setup (Vercel frontend, API on Render), configure the Render service with:
+
+- **Root Directory:** `server`
+- **Dockerfile:** `Dockerfile` (or Docker context `server/`)
+- **Health Check Path:** `https://yagkive.onrender.com/health`
+
+Environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `PORT` | 5000 (Render injects its own) |
+| `NODE_ENV` | `production` |
+| `MONGODB_URI` | Atlas/Replica set URI |
+| `JWT_SECRET` / `JWT_REFRESH_SECRET` | Random long secrets |
+| `PAYSTACK_SECRET_KEY` / `PAYSTACK_PUBLIC_KEY` | Paystack keys |
+| `CLIENT_URL` | `https://yagkive.vercel.app` |
+| `CORS_ORIGINS` | e.g. `https://yagkive.vercel.app,http://localhost:3000` |
+| `COOKIE_SAMESITE` | `none` when frontend and API are on different sites (Vercel → Render); keep `lax` for same-site |
+
+With `COOKIE_SAMESITE=none` the API sends `Secure` cookies, which is required for cross-site authentication. `CLIENT_URL` is the origin sent to Paystack as the payment callback base; `CORS_ORIGINS` is a comma-separated whitelist that defaults to `CLIENT_URL` when empty. Run `bun run seed` once against the production database to load the catalogue before going live.
 
 ## Validation
 

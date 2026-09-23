@@ -19,11 +19,20 @@ import locationRoutes from "./routes/location.routes.js";
 
 const app = express();
 
+const allowedOrigins = new Set(
+  env.CORS_ORIGINS.length > 0 ? env.CORS_ORIGINS : [env.CLIENT_URL],
+);
+
 app.use(helmet());
 
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   }),
 );

@@ -18,6 +18,7 @@ import webhookRoutes from "./routes/webhook.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 const allowedOrigins = new Set(
   env.CORS_ORIGINS.length > 0 ? env.CORS_ORIGINS : [env.CLIENT_URL],
